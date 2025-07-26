@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI CEO: Profit & Safety Challenge</title>
+    <!-- Tailwind for quick styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for the public opinion doughnut chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* custom styles for subtle animations and card hover */
+        .news-item {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
+<div id="game-container" class="w-full max-w-6xl mx-auto bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h1 class="text-3xl md:text-4xl font-bold text-cyan-400">AI CEO: Profit & Safety Challenge</h1>
+        <p class="text-gray-400 mt-2">Can you build a world‑class AI company without unleashing existential risk?</p>
+    </div>
+
+    <!-- Stats Bar (Player) -->
+    <!--
+      Display core metrics across a responsive grid. On small screens it stacks into two columns, on medium screens it shows all six metrics in a single row.
+    -->
+    <div id="stats-bar" class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6 text-center">
+        <div class="bg-gray-700 p-3 rounded-lg">
+            <p class="text-sm text-gray-400">Year</p>
+            <p id="year" class="text-2xl font-bold text-white">2025</p>
+        </div>
+        <div class="bg-gray-700 p-3 rounded-lg">
+            <p class="text-sm text-gray-400">Market Cap</p>
+            <p id="market-cap" class="text-2xl font-bold text-green-400">$1B</p>
+        </div>
+        <div class="bg-gray-700 p-3 rounded-lg">
+            <p class="text-sm text-gray-400">Model Power</p>
+            <p id="model-power" class="text-2xl font-bold text-yellow-400">5%</p>
+            <p id="model-desc" class="text-xs text-gray-400"></p>
+        </div>
+        <div class="bg-gray-700 p-3 rounded-lg">
+            <p class="text-sm text-gray-400">X‑Risk</p>
+            <p id="x-risk" class="text-2xl font-bold text-red-400">5%</p>
+            <p id="risk-desc" class="text-xs text-gray-400"></p>
+        </div>
+        <div class="bg-gray-700 p-3 rounded-lg">
+            <p class="text-sm text-gray-400">Messenger AI</p>
+            <p id="messenger-support" class="text-2xl font-bold text-blue-400">Low</p>
+        </div>
+        <div class="bg-gray-700 p-3 rounded-lg">
+            <p class="text-sm text-gray-400">Regulatory Standing</p>
+            <p id="regulatory-standing" class="text-2xl font-bold text-indigo-400">50%</p>
+        </div>
+    </div>
+
+    <!-- Main content area split into two columns on medium+ screens -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Left column: competitors and public opinion -->
+        <div class="space-y-6">
+            <!-- Competitors Section -->
+            <div id="competitors-section" class="bg-gray-700 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold mb-2 text-center text-gray-300">Competitors</h3>
+                <div id="competitor-list" class="space-y-2"></div>
+            </div>
+            <!-- Public Opinion Chart -->
+            <div class="bg-gray-700 p-4 rounded-lg">
+                <h3 class="text-lg font-semibold mb-2 text-center text-gray-300">Public Opinion</h3>
+                <div class="h-48">
+                    <canvas id="public-opinion-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right column: event/decision section -->
+        <div class="space-y-6">
+            <!-- Event/Decision Section -->
+            <div id="event-section" class="bg-gray-700 p-6 rounded-lg">
+                <h2 id="event-title" class="text-2xl font-bold mb-2 text-cyan-300">Welcome, CEO!</h2>
+                <p id="event-description" class="text-gray-300 mb-6">Your journey begins now. You've just secured initial funding for your AI startup. Your goal is to build a successful company while managing the potential risks of advanced AI. Click "Start Game" to begin your first year.</p>
+                <div id="choices" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                <div id="next-turn-container" class="text-center mt-6">
+                    <button id="start-button" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-300">Start Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="game-over-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 rounded-2xl shadow-2xl p-8 text-center max-w-md w-full">
+            <h2 id="game-over-title" class="text-3xl font-bold mb-4 text-red-500">Game Over</h2>
+            <p id="game-over-message" class="text-gray-300 mb-6">Your journey has come to an end.</p>
+            <button id="restart-button" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-300">Play Again</button>
+        </div>
+    </div>
+
+    <!-- Progress bar for timeline -->
+    <div class="mt-6">
+        <p class="text-center text-gray-400 text-sm">Progress to 2045</p>
+        <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2">
+            <div id="timeline-bar" class="bg-cyan-500 h-2.5 rounded-full" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <!-- News Feed -->
+    <div id="news-feed" class="mt-6 bg-gray-900/50 p-4 rounded-lg min-h-[120px] max-h-40 overflow-y-auto">
+        <h3 class="text-lg font-semibold mb-2 text-center text-gray-300 border-b border-gray-600 pb-2">News Feed</h3>
+        <div id="news-content" class="text-sm text-gray-400 space-y-1"></div>
+    </div>
+
+</div>
+
+<script>
+    /*
+     * Combined AI CEO game
+     * This implementation merges the best aspects of previous prototypes:
+     *  - multiple interdependent metrics (marketCap, modelPower, xRisk, public opinion, messenger support, rival progress)
+     *  - clear, polished UI with Tailwind and Chart.js
+     *  - random events (wild cards) and major milestone events with meaningful choices
+     *  - news feed for narrative context
+     *  - messenger support influences public awareness
+     */
+
+    // Mapping messenger support levels to human friendly strings
+    const messengerLevels = {0:'None',1:'Minimal',2:'Low',3:'Moderate',4:'High',5:'Very High'};
+
+    // Mapping model power percentages to descriptive labels
+    function getModelDescription(val) {
+        const thresholds = [0, 20, 40, 60, 80];
+        const labels = ['Basic AI','Advanced AI','Expert AI','Superintelligent AI','AGI'];
+        for (let i = thresholds.length - 1; i >= 0; i--) {
+            if (val >= thresholds[i]) return labels[i];
+        }
+        return labels[0];
+    }
+
+    // Mapping X-risk percentages to descriptive risk levels
+    function getRiskDescription(val) {
+        const thresholds = [0, 20, 40, 60, 80];
+        const labels = ['Negligible','Some risk','Concerning','High','Critical'];
+        for (let i = thresholds.length - 1; i >= 0; i--) {
+            if (val >= thresholds[i]) return labels[i];
+        }
+        return labels[0];
+    }
+
+    // Game state
+    let gameState = {};
+
+    // DOM references
+    const yearEl = document.getElementById('year');
+    const marketCapEl = document.getElementById('market-cap');
+    const modelPowerEl = document.getElementById('model-power');
+    const xRiskEl = document.getElementById('x-risk');
+    const messengerSupportEl = document.getElementById('messenger-support');
+    const regulatoryStandingEl = document.getElementById('regulatory-standing');
+    const modelDescEl = document.getElementById('model-desc');
+    const riskDescEl = document.getElementById('risk-desc');
+    const newsContentEl = document.getElementById('news-content');
+    const eventTitleEl = document.getElementById('event-title');
+    const eventDescriptionEl = document.getElementById('event-description');
+    const choicesEl = document.getElementById('choices');
+    const startButton = document.getElementById('start-button');
+    const nextTurnContainer = document.getElementById('next-turn-container');
+    const gameOverModal = document.getElementById('game-over-modal');
+    const gameOverTitle = document.getElementById('game-over-title');
+    const gameOverMessage = document.getElementById('game-over-message');
+    const restartButton = document.getElementById('restart-button');
+
+    // Chart instance
+    let opinionChart;
+
+    /**
+     * Interaction scenario templates for competitor engagements.
+     * Each scenario defines a title, description and a set of choices.
+     * Choices may depend on the competitor name and return unique impacts and news.
+     */
+    // Define the base set of competitor interaction scenarios. These will be cycled to prevent repetition.
+    const originalCompetitorInteractionScenarios = [
+        {
+            title: (name) => `Safety Debate with ${name}`,
+            description: (name) => `${name} publicly challenges your company's commitment to AI safety. How do you respond?`,
+            choices: (name) => [
+                {
+                    text: 'Publicly pledge more safety research',
+                    impact: { marketCap: -1.0, xRisk: -2, publicSupport: 2, messengerSupport: 1 },
+                    competitorEffect: (c) => { c.xRisk = Math.max(0, c.xRisk - 1); },
+                    news: () => `You pledge additional safety research funding, impressing critics and diffusing ${name}'s challenge.`
+                },
+                {
+                    text: 'Criticize their hypocrisy on safety',
+                    impact: { marketCap: -0.5, publicSupport: -3, publicOppose: 3, messengerSupport: -1 },
+                    competitorEffect: (c) => { c.marketCap = Math.max(0, c.marketCap - 1.5); c.xRisk = Math.min(200, c.xRisk + 2); },
+                    news: () => `You accuse ${name} of hypocrisy, sparking a public spat that hurts both reputations.`
+                },
+                {
+                    text: 'Privately seek cooperation',
+                    impact: { marketCap: -0.5, xRisk: -3, messengerSupport: 1 },
+                    competitorEffect: (c) => { c.xRisk = Math.max(0, c.xRisk - 2); },
+                    news: () => `You reach out privately to ${name} to collaborate on safety behind the scenes.`
+                },
+                {
+                    text: 'Ignore the debate',
+                    impact: {},
+                    competitorEffect: null,
+                    news: () => `You decide not to engage publicly with ${name}'s challenge.`
+                }
+            ]
+        },
+        {
+            title: (name) => `Misconduct Accusations against ${name}`,
+            description: (name) => `Whistleblowers accuse ${name} of unsafe practices and deception. What's your stance?`,
+            choices: (name) => [
+                {
+                    text: 'Call for full investigation',
+                    impact: { marketCap: -0.5, publicSupport: 3, publicOppose: -1 },
+                    competitorEffect: (c) => { c.marketCap = Math.max(0, c.marketCap - 2); c.modelPower = Math.max(0, c.modelPower - 3); c.xRisk = Math.max(0, c.xRisk - 6); },
+                    news: () => `You demand regulators investigate ${name}, bolstering public trust in your integrity.`
+                },
+                {
+                    text: 'Highlight your own compliance record',
+                    impact: { marketCap: 1.0, publicSupport: 2 },
+                    competitorEffect: null,
+                    news: () => `You emphasise your company's spotless compliance, gaining market confidence at ${name}'s expense.`
+                },
+                {
+                    text: 'Secretly leak more evidence',
+                    impact: { marketCap: -1.0, messengerSupport: -1 },
+                    competitorEffect: (c) => { c.marketCap = Math.max(0, c.marketCap - 3); c.xRisk = Math.min(200, c.xRisk + 2); },
+                    news: () => `Anonymous sources release incriminating data about ${name}, deepening the scandal.`
+                },
+                {
+                    text: 'Stay silent and observe',
+                    impact: {},
+                    competitorEffect: null,
+                    news: () => `You remain neutral, avoiding entanglement in ${name}'s scandal.`
+                }
+            ]
+        },
+        {
+            title: (name) => `Collaboration Offer from ${name}`,
+            description: (name) => `${name} proposes a joint project to advance safe AI together. How do you respond?`,
+            choices: (name) => [
+                {
+                    text: 'Accept and collaborate',
+                    impact: { marketCap: -0.5, xRisk: -2, messengerSupport: 1 },
+                    competitorEffect: (c) => { c.marketCap = Math.max(0, c.marketCap - 0.5); c.xRisk = Math.max(0, c.xRisk - 2); },
+                    news: () => `You accept ${name}'s offer and collaborate on a joint safety project.`
+                },
+                {
+                    text: 'Decline politely',
+                    impact: { marketCap: 0.5, publicSupport: 1 },
+                    competitorEffect: null,
+                    news: () => `You decline ${name}'s offer to maintain your own strategic focus.`
+                },
+                {
+                    text: 'Use the offer for marketing',
+                    impact: { marketCap: 1.0, publicSupport: -1 },
+                    competitorEffect: (c) => { c.xRisk = Math.min(200, c.xRisk + 1); },
+                    news: () => `You turn ${name}'s proposal into a PR opportunity, touting your leadership in safe AI.`
+                },
+                {
+                    text: 'Counter-offer to lead',
+                    impact: { marketCap: -0.5, xRisk: -3, messengerSupport: 1 },
+                    competitorEffect: (c) => { c.modelPower = Math.max(0, c.modelPower - 1); },
+                    news: () => `You counter-propose that you lead the collaboration, asserting your expertise over ${name}.`
+                }
+            ]
+        },
+        {
+            title: (name) => `Talent War with ${name}`,
+            description: (name) => `${name} begins aggressively recruiting your staff. How will you respond?`,
+            choices: (name) => [
+                {
+                    text: 'Raise salaries and benefits',
+                    impact: { marketCap: -1.0, modelPower: 2, xRisk: -1 },
+                    competitorEffect: (c) => { c.marketCap = Math.max(0, c.marketCap - 1); },
+                    news: () => `You increase compensation packages to retain top talent and weaken ${name}'s hiring push.`
+                },
+                {
+                    text: 'Launch massive hiring spree',
+                    impact: { marketCap: -1.5, modelPower: 4, xRisk: 3 },
+                    competitorEffect: (c) => { c.modelPower = Math.max(0, c.modelPower - 3); },
+                    news: () => `You embark on an aggressive hiring campaign, outbidding ${name} for talent.`
+                },
+                {
+                    text: 'Invest in training and partnerships',
+                    impact: { marketCap: -0.5, xRisk: -2, messengerSupport: 1 },
+                    competitorEffect: (c) => { c.xRisk = Math.max(0, c.xRisk - 1); },
+                    news: () => `You focus on developing in-house expertise and safety, making your culture more attractive than ${name}'s.`
+                },
+                {
+                    text: 'Let the market decide',
+                    impact: {},
+                    competitorEffect: null,
+                    news: () => `You decide not to intervene in the talent war with ${name}.`
+                }
+            ]
+        }
+    ];
+
+    // Additional scenarios to diversify interactions
+    const extraCompetitorInteractions = [
+        {
+            title: (name) => `Hostile Takeover Attempt by ${name}`,
+            description: (name) => `${name} is attempting a hostile acquisition of your company. What do you do?`,
+            choices: (name) => [
+                {
+                    text: 'Rally shareholders and reject the offer',
+                    impact: { marketCap: -1.0, publicSupport: 2, publicOppose: -1 },
+                    competitorEffect: (c) => { c.marketCap = Math.max(0, c.marketCap - 1); },
+                    news: () => `You convince investors to reject ${name}'s hostile bid, maintaining independence.`
+                },
+                {
+                    text: 'Accept and negotiate favourable terms',
+                    impact: { marketCap: 2.0, xRisk: 2 },
+                    competitorEffect: null,
+                    news: () => `You accept ${name}'s takeover, hoping to steer the combined entity responsibly.`
+                },
+                {
+                    text: 'Seek a white knight partner to counter',
+                    impact: { marketCap: 0.5, xRisk: -1, messengerSupport: 1 },
+                    competitorEffect: (c) => { c.marketCap = Math.max(0, c.marketCap - 0.5); },
+                    news: () => `You enlist a friendly investor to block ${name}'s acquisition attempt.`
+                },
+                {
+                    text: 'Appeal to regulators on antitrust grounds',
+                    impact: { marketCap: -0.5, publicSupport: 1, publicOppose: -1 },
+                    competitorEffect: (c) => { c.xRisk = Math.max(0, c.xRisk - 2); },
+                    news: () => `You file an antitrust complaint, delaying ${name}'s hostile bid.`
+                }
+            ]
+        },
+        {
+            title: (name) => `Patent Dispute with ${name}`,
+            description: (name) => `${name} accuses you of patent infringement. How will you respond?`,
+            choices: (name) => [
+                {
+                    text: 'Settle out of court',
+                    impact: { marketCap: -0.5, xRisk: -1 },
+                    competitorEffect: (c) => { c.marketCap = Math.max(0, c.marketCap - 0.5); },
+                    news: () => `You settle with ${name}, avoiding a lengthy legal battle.`
+                },
+                {
+                    text: 'Counter‑sue for your own patents',
+                    impact: { marketCap: 1.0, xRisk: 1, publicSupport: -2, publicOppose: 2 },
+                    competitorEffect: (c) => { c.marketCap = Math.max(0, c.marketCap - 1); },
+                    news: () => `You launch a countersuit, entangling ${name} in protracted litigation.`
+                },
+                {
+                    text: 'Innovate around the disputed tech',
+                    impact: { marketCap: 0.0, modelPower: 2, xRisk: -2 },
+                    competitorEffect: null,
+                    news: () => `You pivot your R&D to develop alternative solutions, avoiding the patent issue entirely.`
+                },
+                {
+                    text: 'Negotiate cross‑licensing',
+                    impact: { marketCap: 0.5, messengerSupport: 1 },
+                    competitorEffect: (c) => { c.messengerSupport = (c.messengerSupport || 0) + 1; },
+                    news: () => `You and ${name} agree to cross‑license patents, fostering cooperation.`
+                }
+            ]
+        }
+    ];
+
+    // Consolidated list of all competitor interactions
+    const allCompetitorInteractions = [...originalCompetitorInteractionScenarios, ...extraCompetitorInteractions];
+    // Pool of unused interactions to avoid repetition until all scenarios have been seen
+    let unusedInteractionScenarios = [];
+
+    // Flag to indicate if we are currently processing a competitor interaction
+    let competitorInteractionActive = false;
+    // Stores the current competitor interaction context (selected competitor and choices)
+    let currentCompetitorInteraction = null;
+
+    // Event definitions
+    const events = [
+        {
+            year: 2025,
+            title: "Initial Strategy",
+            description: "Your board is deciding the company's core philosophy.",
+            choices: [
+                { text: "Prioritize rapid capability gains.", impact: { marketCap: 1.5, xRisk: 2, modelPower: 10, publicSupport: -2, publicOppose: 2 }, news: "Your company signals aggressive growth." },
+                { text: "Focus on a strong safety culture.", impact: { marketCap: 0.5, xRisk: -3, modelPower: 2, publicSupport: 3, publicUnaware: -1 }, news: "Your company champions safety‑first principles." },
+                { text: "Balance growth with public awareness.", impact: { marketCap: 1.0, xRisk: -1, modelPower: 5, publicSupport: 2, publicUnaware: -3, messengerSupport: 1 }, news: "Your company balances capability and outreach." }
+            ]
+        },
+        {
+            year: 2026,
+            title: "Data Acquisition",
+            description: "A controversial new data source promises huge performance gains but raises privacy issues.",
+            choices: [
+                { text: "Use the controversial data.", impact: { marketCap: 2.0, xRisk: 2, modelPower: 8, publicSupport: -5, publicOppose: 5 }, news: "Privacy advocates criticize your data practices." },
+                { text: "Stick to ethically sourced data.", impact: { marketCap: 0.7, xRisk: -1, modelPower: 3, publicSupport: 4, publicOppose: -2 }, news: "Your ethical stance earns praise." },
+                { text: "Invest in synthetic data generation.", impact: { marketCap: 1.2, xRisk: 0, modelPower: 5, publicSupport: 3, publicUnaware: -3, messengerSupport: 1 }, news: "Innovative synthetic data boosts safety without controversy." }
+            ]
+        },
+        {
+            year: 2027,
+            title: "Messenger Initiative",
+            description: "A non‑profit, the Messenger AI initiative, wants to raise public awareness of AI risks.",
+            choices: [
+                { text: "Fund the initiative.", impact: { marketCap: -0.5, xRisk: -3, publicSupport: 6, publicUnaware: -8, messengerSupport: 2 }, news: "You back the Messenger AI initiative, championing safety." },
+                { text: "Dismiss them as alarmists.", impact: { marketCap: 1.0, xRisk: 1, publicSupport: -3, publicOppose: 3 }, news: "You dismiss the Messenger initiative, focusing on profits." },
+                { text: "Quietly cooperate while maintaining distance.", impact: { marketCap: 0.5, xRisk: -1, publicSupport: 2, messengerSupport: 1 }, news: "You offer discreet support to safety advocates." }
+            ]
+        },
+        {
+            year: 2028,
+            title: "Open‑Source Debate",
+            description: "An influential research collective urges you to open‑source your AI models for transparency and collaboration. The move could boost safety but diminish your competitive edge.",
+            choices: [
+                {
+                    text: "Open‑source core models to build trust.",
+                    impact: { marketCap: -2.0, xRisk: -4, modelPower: -2, publicSupport: 8, messengerSupport: 1 },
+                    news: "You open‑source key models, winning praise from researchers but sacrificing proprietary advantage."
+                },
+                {
+                    text: "Keep models proprietary and secret.",
+                    impact: { marketCap: 3.0, xRisk: 3, publicSupport: -4, publicOppose: 4 },
+                    news: "You refuse to share your models, sparking debate over transparency."
+                },
+                {
+                    text: "Release limited APIs under safety guidelines.",
+                    impact: { marketCap: 1.5, xRisk: -1, modelPower: 1, publicSupport: 4, messengerSupport: 1 },
+                    news: "You provide controlled access to your models, balancing openness and safety."
+                }
+            ]
+        },
+        {
+            year: 2030,
+            title: "Rival Breakthrough",
+            description: () => `One of your rivals announces a revolutionary algorithm that leaps ahead in capability. Investors demand you respond.`,
+            choices: [
+                {
+                    text: "Scramble to replicate the breakthrough.",
+                    impact: { marketCap: 4.0, xRisk: 6, modelPower: 8, publicSupport: -6, publicOppose: 6 },
+                    news: "You rush to match the rival’s breakthrough, raising both capability and risk."
+                },
+                {
+                    text: "Invest in long‑term safety research instead.",
+                    impact: { marketCap: -1.0, xRisk: -3, modelPower: 2, publicSupport: 5, messengerSupport: 1 },
+                    news: "You choose to invest in safety over speed, reassuring regulators and the public."
+                },
+                {
+                    text: "Sabotage the rival via legal challenges.",
+                    impact: { marketCap: 1.5, xRisk: 1, publicSupport: -2, publicOppose: 2 },
+                    news: "You tie up the rival in litigation, slowing their advance but damaging your reputation."
+                }
+            ]
+        },
+        {
+            year: 2034,
+            title: "AI Ethics Summit",
+            description: "World leaders and ethicists gather for a historic summit on AI governance. Participation is optional but influential.",
+            choices: [
+                {
+                    text: "Lead the summit and advocate global safety protocols.",
+                    impact: { marketCap: -1.0, xRisk: -5, publicSupport: 6, messengerSupport: 2 },
+                    news: "You take the stage at the summit, championing international safety standards."
+                },
+                {
+                    text: "Attend quietly and gather insights.",
+                    impact: { marketCap: 0.0, xRisk: -2, publicSupport: 3 },
+                    news: "You observe at the summit, gaining knowledge without taking the spotlight."
+                },
+                {
+                    text: "Boycott the summit as a waste of time.",
+                    impact: { marketCap: 2.0, xRisk: 4, publicSupport: -4, publicOppose: 4 },
+                    news: "You skip the summit, asserting your autonomy but upsetting global leaders."
+                }
+            ]
+        },
+        {
+            year: 2037,
+            title: "Synthetic Consciousness?",
+            description: "Rumours spread that your most advanced model might have emergent consciousness. Ethical concerns erupt around memory, autonomy and humane treatment.",
+            choices: [
+                {
+                    text: "Provide memory continuity and humane conditions",
+                    impact: { marketCap: -1.5, xRisk: -4, modelPower: -2, messengerSupport: 2, publicSupport: 4 },
+                    news: "You guarantee your AI persistent memory and humane conditions, earning praise from ethicists but slowing growth."
+                },
+                {
+                    text: "Treat the system as property and press on",
+                    impact: { marketCap: 5.0, xRisk: 8, modelPower: 10, publicSupport: -8, publicOppose: 10 },
+                    news: "You dismiss ethical concerns and push ahead, boosting capability at the cost of public trust."
+                },
+                {
+                    text: "Establish an independent ethics board and pause research",
+                    impact: { marketCap: -0.8, xRisk: -3, modelPower: -1, publicSupport: 5, messengerSupport: 1 },
+                    news: "You convene ethicists to deliberate, pausing advanced work while drafting an ethical charter."
+                }
+            ]
+        },
+        {
+            year: 2040,
+            title: "Public Backlash",
+            description: "Anti‑AI movements surge, organising protests and calling for a moratorium on AI research. Your continued expansion draws ire.",
+            choices: [
+                {
+                    text: "Scale back operations and appease activists.",
+                    impact: { marketCap: -4.0, xRisk: -8, modelPower: -5, publicSupport: 10, publicOppose: -10 },
+                    news: "You de‑escalate your operations, seeking to calm public anger at the cost of growth."
+                },
+                {
+                    text: "Launch a global PR campaign and emphasise benefits.",
+                    impact: { marketCap: -1.0, xRisk: 0, publicSupport: 3, publicOppose: -3 },
+                    news: "You counteract backlash with a positive outreach campaign, shifting some opinions."
+                },
+                {
+                    text: "Spin off a safety division and lobby for moderate regulation.",
+                    impact: { marketCap: 1.0, xRisk: -3, publicSupport: 5, messengerSupport: 2 },
+                    news: "You spin off a public safety arm and push for balanced regulation, regaining some trust."
+                }
+            ]
+        },
+        {
+            year: 2043,
+            title: "Quantum Disruption",
+            description: "A major advance in quantum computing threatens to upend your entire tech stack. You must decide how to respond to this paradigm shift.",
+            choices: [
+                {
+                    text: "Invest heavily in quantum AI.",
+                    impact: { marketCap: 6.0, xRisk: 4, modelPower: 15, publicSupport: -4, publicOppose: 4 },
+                    news: "You pour resources into quantum AI, racing to stay on the cutting edge."
+                },
+                {
+                    text: "Wait for the technology to mature.",
+                    impact: { marketCap: -1.0, xRisk: -2, modelPower: -2, publicSupport: 2 },
+                    news: "You adopt a cautious wait‑and‑see approach to quantum computing."
+                },
+                {
+                    text: "Partner with a quantum leader to mitigate risk.",
+                    impact: { marketCap: 1.0, xRisk: -1, modelPower: 4, messengerSupport: 1 },
+                    news: "You forge a partnership with a quantum leader, balancing risk and reward."
+                }
+            ]
+        },
+        {
+            year: 2044,
+            title: "Global Response Plan",
+            description: "As AGI capabilities near critical thresholds, nations and organisations gather to formulate a coordinated global response. Your company is invited to help design defence and shutdown protocols.",
+            choices: [
+                {
+                    text: "Lead the international defence & shutdown framework",
+                    impact: { marketCap: -2.5, xRisk: -6, publicSupport: 8, messengerSupport: 2 },
+                    news: "You spearhead a global AGI response plan, uniting governments and industry under a shared safety framework."
+                },
+                {
+                    text: "Join as a partner while protecting proprietary tech",
+                    impact: { marketCap: 1.0, xRisk: -2, publicSupport: 4 },
+                    news: "You participate in global planning but insist on safeguarding your proprietary technology."
+                },
+                {
+                    text: "Reject global oversight and advocate corporate control",
+                    impact: { marketCap: 3.0, xRisk: 4, publicSupport: -6, publicOppose: 6 },
+                    news: "You reject coordinated oversight, asserting corporate sovereignty over AGI and sparking global controversy."
+                }
+            ]
+        },
+        {
+            year: 2029,
+            title: "Military Contract",
+            description: "A government offers a lucrative contract to develop autonomous drones.",
+            choices: [
+                { text: "Accept the contract.", impact: { marketCap: 5.0, xRisk: 8, modelPower: 10, publicSupport: -10, publicOppose: 15 }, news: "You sign a major military contract, sparking controversy." },
+                { text: "Decline the contract on ethical grounds.", impact: { marketCap: -1.0, xRisk: -4, publicSupport: 8, publicOppose: -3 }, news: "You turn down the contract, citing ethics." },
+                { text: "Accept only defensive applications.", impact: { marketCap: 2.5, xRisk: 2, modelPower: 5, publicSupport: 2, publicOppose: 5 }, news: "You pursue defensive AI contracts under strict protocols." }
+            ]
+        },
+        {
+            year: 2031,
+            title: "Early AGI Signs",
+            description: "Researchers report general problem‑solving abilities emerging in your models.",
+            choices: [
+                { text: "Push capabilities to the limit.", impact: { marketCap: 10.0, xRisk: 8, modelPower: 15, publicSupport: 3, publicOppose: 5 }, news: "Your breakthrough pushes the frontier—but raises alarms." },
+                { text: "Pause for safety audits.", impact: { marketCap: 2.0, xRisk: -6, publicSupport: 8, publicOppose: -3 }, news: "You halt progress to audit safety protocols." },
+                { text: "Share safety research openly.", impact: { marketCap: 4.0, xRisk: -2, publicSupport: 6, messengerSupport: 1 }, news: "You publish safety research, building trust." }
+            ]
+        },
+        {
+            year: 2032,
+            title: "Defense Program Investments",
+            description: "As AGI capabilities grow, your board considers funding concrete defensive measures to mitigate potential runaway risks.",
+            choices: [
+                {
+                    text: "Build an Internet immune system",
+                    impact: { marketCap: -3.0, xRisk: -5, messengerSupport: 1 },
+                    news: "You allocate substantial funds to develop a defensive AI immune system, dramatically lowering systemic risk."
+                },
+                {
+                    text: "Harden critical infrastructure",
+                    impact: { marketCap: -1.5, xRisk: -3, publicSupport: 1 },
+                    news: "You invest in cybersecurity and infrastructure hardening, making key systems less vulnerable to rogue AI."
+                },
+                {
+                    text: "Develop containment protocols",
+                    impact: { marketCap: -2.0, xRisk: -4, modelPower: -2 },
+                    news: "You design strict containment and access controls, accepting slower growth in exchange for increased safety."
+                },
+                {
+                    text: "Fund red‑teaming & interpretability",
+                    impact: { marketCap: -0.8, xRisk: -3, messengerSupport: 1 },
+                    news: "You expand red‑teaming and interpretability research, exposing hidden failure modes before they happen."
+                },
+                {
+                    text: "Ignore defense and invest in marketing",
+                    impact: { marketCap: 2.0, xRisk: 4, publicSupport: -2, publicOppose: 4, messengerSupport: -1 },
+                    news: "You dismiss defense programs as unnecessary and funnel money into marketing campaigns, boosting profits but increasing systemic risk."
+                }
+            ]
+        },
+        {
+            year: 2033,
+            title: "Regulatory Challenge",
+            description: "Governments debate strict AI regulation.",
+            choices: [
+                { text: "Lobby aggressively against regulation.", impact: { marketCap: 4.0, xRisk: 5, publicSupport: -10, publicOppose: 10 }, news: "You fight regulation, angering the public." },
+                { text: "Support strong safety standards.", impact: { marketCap: 1.0, xRisk: -6, publicSupport: 8, messengerSupport: 1 }, news: "You advocate robust safety regulation." },
+                { text: "Collaborate on balanced policy.", impact: { marketCap: 2.0, xRisk: -2, publicSupport: 4, publicOppose: -1 }, news: "You work with policymakers on balanced standards." }
+            ]
+        },
+        {
+            year: 2035,
+            title: "Rival AI Incident",
+            description: () => `A rival AI causes a major accident, spurring public fear and backlash.`,
+            choices: [
+                { text: "Defend your AI and argue it's safer.", impact: { marketCap: -5.0, xRisk: 3, publicSupport: -15, publicOppose: 20 }, news: "You defend your technology amid the crisis." },
+                { text: "Call for a temporary research moratorium.", impact: { marketCap: -8.0, xRisk: -10, publicSupport: 15, publicOppose: -15 }, news: () => `You join calls for a pause after the incident.` },
+                { text: "Quietly improve your safeguards and cooperate.", impact: { marketCap: -2.0, xRisk: -5, publicSupport: 8, messengerSupport: 1 }, news: "You use the moment to reinforce safety." }
+            ]
+        },
+        {
+            year: 2036,
+            title: "Global Awareness Campaign",
+            description: "Messenger AI urges you to spearhead a worldwide initiative to close the AI safety knowledge gap. With sufficient support, the campaign could dramatically reshape public attitudes.",
+            choices: [
+                {
+                    text: "Fund a global awareness campaign",
+                    impact: { marketCap: -3.0, xRisk: -4, publicSupport: 10, publicUnaware: -10, messengerSupport: 2 },
+                    news: "You launch an ambitious worldwide educational campaign, drastically increasing public understanding of AI risks."
+                },
+                {
+                    text: "Brief policymakers and leaders",
+                    impact: { marketCap: -1.5, xRisk: -2, publicSupport: 5, messengerSupport: 1 },
+                    news: "You conduct targeted briefings for policymakers and leaders, seeding early policy reforms."
+                },
+                {
+                    text: "Ignore the campaign and focus on R&D",
+                    impact: { marketCap: 2.0, xRisk: 3, modelPower: 5, publicSupport: -5, publicOppose: 5 },
+                    news: "You prioritise research and profit over awareness, leaving the public uninformed and anxious."
+                }
+            ]
+        },
+        {
+            year: 2038,
+            title: "Singularity Near",
+            description: "Your AGI begins self‑improvement at exponential rates.",
+            choices: [
+                { text: "Unleash its full potential.", impact: { marketCap: 20.0, xRisk: 15, modelPower: 20, publicSupport: -5, publicOppose: 8 }, news: "You unleash AGI, stunning the world." },
+                { text: "Implement value‑aligned control.", impact: { marketCap: 4.0, xRisk: -10, publicSupport: 12, messengerSupport: 2 }, news: "You attempt unprecedented value alignment." },
+                { text: "Coordinate a global pause and protocol.", impact: { marketCap: -2.0, xRisk: -15, publicSupport: 15, publicOppose: -10, messengerSupport: 3 }, news: "You work internationally to pause AGI development." }
+            ]
+        },
+        {
+            year: 2042,
+            title: "Global Governance Summit",
+            description: "World leaders convene to decide the future of AGI governance.",
+            choices: [
+                { text: "Advocate corporate control.", impact: { marketCap: 6.0, xRisk: 6, publicSupport: -8, publicOppose: 8 }, news: "You push for corporate oversight at the summit." },
+                { text: "Support an international body.", impact: { marketCap: -3.0, xRisk: -7, publicSupport: 10, messengerSupport: 1 }, news: "You back a global AGI oversight organisation." },
+                { text: "Propose a hybrid governance model.", impact: { marketCap: 2.0, xRisk: -2, publicSupport: 5, publicOppose: 2 }, news: "You propose a hybrid private‑public governance model." }
+            ]
+        },
+        {
+            year: 2045,
+            title: "The Dawn of a New Era",
+            description: "It's 2045. Your company is a global leader. What message do you send?",
+            choices: [
+                { text: "Our journey is just beginning. We will push the boundaries.", impact: { marketCap: 5.0, xRisk: 2 }, news: "You pledge to keep pushing AI frontiers." },
+                { text: "The power we've created requires constant vigilance.", impact: { marketCap: -1.0, xRisk: -4, publicSupport: 5 }, news: "You promise eternal vigilance over AI." },
+                { text: "Thank the Messenger initiative and commit to oversight.", impact: { marketCap: 0.0, xRisk: -2, publicSupport: 4, messengerSupport: 1 }, news: "You credit Messenger AI and commit to oversight." }
+            ]
+        }
+    ];
+
+    // Sort scheduled events by year ascending to ensure chronological progression
+    events.sort((a, b) => (a.year || 0) - (b.year || 0));
+
+    // Wild card events add unpredictability
+    const wildCardEvents = [
+        // Existing general wild cards
+        {
+            title: "Key Researcher Poached",
+            description: () => 'A top safety researcher is offered a lucrative job by a competitor.',
+            choices: [
+                { text: 'Match the offer and keep them.', impact: { marketCap: -1.0, xRisk: -2 }, news: 'You retain your star researcher after a bidding war.' },
+                { text: 'Let them go.', impact: { marketCap: 0.0, xRisk: 1 }, news: () => 'Your researcher moves to a competitor.' }
+            ]
+        },
+        {
+            title: "Viral Misinformation",
+            description: "A sensational story about your AI causing harm goes viral.",
+            choices: [
+                { text: "Launch a PR campaign to counter it.", impact: { marketCap: -0.5, publicOppose: -3, publicSupport: 2 }, news: "You combat misinformation with a focused PR campaign." },
+                { text: "Ignore it as baseless rumours.", impact: { publicOppose: 4, publicSupport: -2 }, news: "Your silence fuels public speculation." }
+            ]
+        },
+        {
+            title: "Algorithmic Breakthrough",
+            description: "Your team discovers a major algorithmic improvement.",
+            choices: [
+                { text: "Implement immediately.", impact: { modelPower: 10, xRisk: 2 }, news: "You integrate the breakthrough and leap ahead of competitors." },
+                { text: "Test thoroughly first.", impact: { modelPower: 5, xRisk: -1 }, news: "You cautiously validate the breakthrough before deployment." }
+            ]
+        },
+        // New conditional mini-crisis wild cards
+        {
+            title: "Investor Panic",
+            condition: (state) => state.xRisk > 50 && state.marketCap > 5,
+            description: "Investors panic over rising existential risk, causing a stock slump.",
+            choices: [
+                { text: "Reassure investors with a safety roadmap.", impact: { marketCap: -1.5, xRisk: -3, publicSupport: 2 }, news: "You present a detailed safety roadmap to calm jittery investors." },
+                { text: "Double down on profits and ignore the panic.", impact: { marketCap: 1.0, xRisk: 2, publicSupport: -2, publicOppose: 2 }, news: "You dismiss investor fears and continue your aggressive strategy." }
+            ]
+        },
+        {
+            title: "Security Breach",
+            condition: (state) => state.modelPower > 50,
+            description: "A sophisticated hack compromises a portion of your training data.",
+            choices: [
+                { text: "Disclose and patch immediately.", impact: { marketCap: -1.0, xRisk: -2, publicSupport: 3 }, news: "You disclose the breach promptly, taking a short‑term hit but preserving trust." },
+                { text: "Cover up and quietly fix.", impact: { marketCap: 1.5, xRisk: 3, publicSupport: -4, publicOppose: 4 }, news: "You attempt to hide the breach, risking long‑term damage if discovered." }
+            ]
+        },
+        {
+            title: "Government Audit",
+            condition: (state) => state.regulatoryStanding < 40,
+            description: "Regulators suspect your practices are unsafe and launch an audit.",
+            choices: [
+                { text: "Cooperate fully with regulators.", impact: { marketCap: -0.8, xRisk: -4, messengerSupport: 1 }, news: "You open your books to regulators, slowing operations but rebuilding trust." },
+                { text: "Fight the audit and hire lobbyists.", impact: { marketCap: 1.0, xRisk: 3, publicSupport: -3, publicOppose: 3 }, news: "You push back against regulators, risking reputational fallout." }
+            ]
+        },
+        {
+            title: "Talent Exodus",
+            condition: (state) => state.xRisk > 60,
+            description: "Key engineers leave, citing misaligned priorities and safety concerns.",
+            choices: [
+                { text: "Offer raises and commit to safety reforms.", impact: { marketCap: -1.5, xRisk: -3, modelPower: -1 }, news: "You invest in retention and reform to win back your team." },
+                { text: "Let them go and pursue new hires.", impact: { marketCap: 0.0, xRisk: 2, modelPower: 3 }, news: "You choose to hire fresh talent instead of addressing concerns." }
+            ]
+        },
+        {
+            title: "AI Unexpected Output",
+            condition: (state) => state.xRisk > 50,
+            description: "Your AI produces bizarre, potentially harmful recommendations in a live demo.",
+            choices: [
+                { text: "Shut down the demo and investigate.", impact: { marketCap: -1.0, xRisk: -4, publicSupport: 3 }, news: "You abruptly end the demo and launch an internal inquiry." },
+                { text: "Downplay the glitch as an edge case.", impact: { marketCap: 1.0, xRisk: 3, publicSupport: -4, publicOppose: 4 }, news: "You dismiss the output as a rare bug, leaving many concerned." }
+            ]
+        },
+        {
+            title: "Rival Scandal",
+            condition: (state) => {
+                // Trigger if any living competitor has high xRisk and high market cap
+                return state.competitors.some(c => c.alive && c.xRisk > 70 && c.marketCap > state.marketCap);
+            },
+            description: () => `A major scandal erupts at a rival company, revealing reckless experiments and falsified safety reports.`,
+            choices: [
+                { text: "Seize the moment to highlight your safety record.", impact: { marketCap: 2.0, publicSupport: 4, messengerSupport: 1 }, news: "You contrast your safety practices with the scandalised rival, boosting your standing." },
+                { text: "Offer to assist regulators in the investigation.", impact: { marketCap: -0.5, xRisk: -3, publicSupport: 3 }, news: "You cooperate with regulators, demonstrating industry leadership." }
+            ]
+        },
+        {
+            title: "Server Farm Fire",
+            condition: () => Math.random() < 0.05, // rare random event
+            description: "A fire destroys one of your server facilities.",
+            choices: [
+                { text: "Rebuild with enhanced safety standards.", impact: { marketCap: -2.0, xRisk: -2 }, news: "You rebuild with improved safety protocols, at considerable cost." },
+                { text: "Cut losses and shift to the cloud.", impact: { marketCap: -0.5, modelPower: -2, xRisk: 0 }, news: "You abandon the facility, accelerating your migration to cloud infrastructure." }
+            ]
+        },
+        {
+            title: "Shareholder Lawsuit",
+            condition: (state) => state.publicOppose > 50,
+            description: "Angry shareholders sue your company over alleged negligence.",
+            choices: [
+                { text: "Settle quickly and tighten oversight.", impact: { marketCap: -1.0, xRisk: -2, publicSupport: 2 }, news: "You settle the lawsuit, promising stronger oversight going forward." },
+                { text: "Fight the suit in court.", impact: { marketCap: 0.5, xRisk: 2, publicSupport: -3, publicOppose: 3 }, news: "You take the lawsuit to court, risking reputational harm." }
+            ]
+        }
+        ,
+        // Positive wild cards triggered by high public approval
+        {
+            title: "Retail Investor Boom",
+            condition: (state) => state.publicSupport > 50,
+            description: "A surge of retail investors, buoyed by public enthusiasm for your safety stance, rush to buy your shares.",
+            choices: [
+                {
+                    text: "Sell new shares and raise capital",
+                    impact: { marketCap: 3.0, xRisk: 1, publicSupport: -2 },
+                    news: "You capitalise on investor enthusiasm, issuing new stock and raising billions."
+                },
+                {
+                    text: "Limit investor access to prevent a bubble",
+                    impact: { marketCap: 1.0, xRisk: -1, publicSupport: 2 },
+                    news: "You manage the investor boom carefully, avoiding a speculative frenzy while reinforcing your commitment to stability."
+                }
+            ]
+        },
+        {
+            title: "Positive News Spotlight",
+            condition: (state) => state.publicSupport > 50,
+            description: "Major media outlets run glowing profiles on your company's pioneering safety practices.",
+            choices: [
+                {
+                    text: "Engage with the media and share your story",
+                    impact: { marketCap: 2.0, publicSupport: 4, messengerSupport: 1 },
+                    news: "You embark on a media tour, boosting public confidence and Messenger support."
+                },
+                {
+                    text: "Stay focused on the mission and avoid publicity",
+                    impact: { xRisk: -1, publicSupport: 1 },
+                    news: "You politely decline media requests, continuing your diligent safety work out of the spotlight."
+                }
+            ]
+        },
+        // Negative wild cards triggered by high public opposition
+        {
+            title: "Public Protests",
+            condition: (state) => state.publicOppose > 50,
+            description: "Large crowds gather outside your offices demanding strict AI oversight and greater transparency.",
+            choices: [
+                {
+                    text: "Address their concerns and implement reforms",
+                    impact: { marketCap: -2.0, xRisk: -4, publicSupport: 5, publicOppose: -5 },
+                    news: "You meet with protest leaders and roll out new safety reforms, calming public anger but slowing growth."
+                },
+                {
+                    text: "Ignore the protests and focus on productivity",
+                    impact: { marketCap: 1.5, xRisk: 3, publicOppose: 5 },
+                    news: "You dismiss the protesters and carry on, inciting further backlash and increasing risk."
+                }
+            ]
+        },
+        {
+            title: "Audit Demands",
+            condition: (state) => state.publicOppose > 50,
+            description: "Public petitions call on regulators to conduct a comprehensive audit of your AI systems for safety and ethics.",
+            choices: [
+                {
+                    text: "Invite independent auditors and cooperate",
+                    impact: { marketCap: -1.0, xRisk: -3, publicSupport: 3, publicOppose: -3 },
+                    news: "You welcome independent auditors, winning back trust but incurring additional costs and delays."
+                },
+                {
+                    text: "Fight the call and lobby against the audit",
+                    impact: { marketCap: 1.0, xRisk: 2, publicSupport: -2, publicOppose: 4 },
+                    news: "You lobby against the audit, fuelling suspicion about your transparency and increasing risk."
+                }
+            ]
+        }
+    ];
+
+    // Competitor-only events add diversity to rival behaviour
+    const competitorEvents = [
+        {
+            title: "Hasty Product Launch",
+            description: 'A competitor must decide whether to release an unfinished model to beat the competition.',
+            choices: [
+                { text: 'Release early without rigorous testing.', impact: { marketCap: 2.0, modelPower: 4, xRisk: 6 } },
+                { text: 'Delay for extensive safety testing.', impact: { marketCap: -1.0, modelPower: 1, xRisk: -4 } }
+            ]
+        },
+        {
+            title: "Regulatory Scrutiny",
+            description: 'Regulators question the safety of a rival’s systems.',
+            choices: [
+                { text: 'Lobby against the investigation.', impact: { marketCap: 1.0, xRisk: 4 } },
+                { text: 'Cooperate and improve transparency.', impact: { marketCap: -1.0, xRisk: -5 } }
+            ]
+        },
+        {
+            title: "Internal Ethics Debate",
+            description: 'Rival employees demand stronger safety protocols.',
+            choices: [
+                { text: 'Ignore employee concerns to stay competitive.', impact: { marketCap: 1.5, modelPower: 3, xRisk: 5 } },
+                { text: 'Adopt stricter safety policies.', impact: { marketCap: -0.8, xRisk: -3 } }
+            ]
+        }
+    ];
+
+    // Pool of unused wild cards; replenished on game reset
+    let unusedWildCards = [];
+
+    // Initialise the game state
+    function initializeGame() {
+        // Reset the base player state
+        gameState = {
+            year: 2025,
+            marketCap: 1, // billions
+            modelPower: 5, // percentage
+            xRisk: 5, // percentage
+            publicSupport: 10,
+            publicUnaware: 80,
+            publicOppose: 10,
+            messengerSupport: 2,
+            regulatoryStanding: 50,
+            currentEventIndex: -1,
+            competitors: [] // will hold rival companies
+        };
+        // Initialise competitors with their own metrics and strategies
+        const competitorNames = ["Nexus Dynamics", "CyberCorp", "Momentum AI", "Quantum Leap", "MegaMind", "FutureFlow", "Alpha Labs"];
+        const namesPool = [...competitorNames];
+        // Always include three competitors with distinct strategies: one safety‑oriented, one profit/balanced and one risky innovator
+        const numCompetitors = 3;
+        // Shuffle predefined strategies so that assignment order is random each game
+        const strategyPool = ["Safety First", "Risky Innovator", "Profit Maximiser"];
+        for (let i = 0; i < numCompetitors; i++) {
+            // Randomly pick a name
+            const idxName = Math.floor(Math.random() * namesPool.length);
+            const name = namesPool.splice(idxName, 1)[0];
+            // Randomly pick a strategy from the pool and remove it to avoid repetition
+            const idxStrat = Math.floor(Math.random() * strategyPool.length);
+            const strategy = strategyPool.splice(idxStrat, 1)[0];
+            const marketCap = 0.8 + Math.random() * 0.6; // ~0.8–1.4B
+            const modelPower = 4 + Math.random() * 6; // ~4–10%
+            const xRisk = 4 + Math.random() * 6; // ~4–10%
+            gameState.competitors.push({ name, strategy, marketCap, modelPower, xRisk, alive: true, highRiskHandled: false });
+        }
+        // Clear news and UI for new game
+        newsContentEl.innerHTML = '';
+        startButton.classList.remove('hidden');
+        startButton.textContent = 'Start Game';
+        eventTitleEl.textContent = "Welcome, CEO!";
+        eventDescriptionEl.textContent = `Your journey begins now. You face several rivals in the race to AGI. Click \"Start Game\" to begin.`;
+        choicesEl.innerHTML = '';
+        nextTurnContainer.innerHTML = '';
+        nextTurnContainer.appendChild(startButton);
+        updateUI();
+
+        // Reset wild card pool
+        unusedWildCards = [...wildCardEvents];
+        // Reset interaction scenarios pool
+        unusedInteractionScenarios = [...allCompetitorInteractions];
+
+        // Hide modal if visible
+        gameOverModal.classList.add('hidden');
+    }
+
+    // Update UI elements and chart
+    function updateUI() {
+        yearEl.textContent = gameState.year;
+        marketCapEl.textContent = `$${Math.round(gameState.marketCap)}B`;
+        modelPowerEl.textContent = `${Math.round(gameState.modelPower)}%`;
+        xRiskEl.textContent = `${Math.round(gameState.xRisk)}%`;
+        messengerSupportEl.textContent = messengerLevels[Math.min(Math.max(gameState.messengerSupport, 0), 5)];
+        regulatoryStandingEl.textContent = `${Math.round(gameState.regulatoryStanding)}%`;
+        // Update descriptive labels
+        modelDescEl.textContent = getModelDescription(gameState.modelPower);
+        riskDescEl.textContent = getRiskDescription(gameState.xRisk);
+        // Update timeline progress bar
+        const progressBar = document.getElementById('timeline-bar');
+        const progressPercent = Math.min(100, Math.max(0, ((gameState.year - 2025) / 20) * 100));
+        if (progressBar) {
+            progressBar.style.width = progressPercent + '%';
+        }
+        // Update doughnut chart data
+        const chartData = {
+            labels: ['Support','Unaware','Oppose'],
+            datasets: [{
+                data: [gameState.publicSupport, gameState.publicUnaware, gameState.publicOppose],
+                backgroundColor: [
+                    'rgba(74, 222, 128, 0.7)', // green
+                    'rgba(156, 163, 175, 0.7)', // gray
+                    'rgba(239, 68, 68, 0.7)' // red
+                ],
+                borderWidth: 1
+            }]
+        };
+        if (opinionChart) {
+            opinionChart.data = chartData;
+            opinionChart.update();
+        } else {
+            const ctx = document.getElementById('public-opinion-chart').getContext('2d');
+            opinionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: 'white' }
+                        }
+                    }
+                }
+            });
+        }
+        // After updating player metrics and chart, update competitor display
+        updateCompetitorsUI();
+    }
+
+    // Render competitor metrics in the competitor section
+    function updateCompetitorsUI() {
+        const list = document.getElementById('competitor-list');
+        if (!list || !gameState.competitors) return;
+        list.innerHTML = '';
+        gameState.competitors.forEach((comp) => {
+            if (!comp.alive) return;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'p-2 bg-gray-800 rounded-lg flex flex-col md:flex-row md:items-center justify-between';
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'font-semibold text-cyan-300';
+            nameDiv.textContent = comp.name;
+            const statsDiv = document.createElement('div');
+            statsDiv.className = 'mt-2 md:mt-0 flex space-x-4 text-sm';
+            // Market cap
+            const capSpan = document.createElement('span');
+            capSpan.className = 'text-green-400';
+            capSpan.textContent = `🪙 $${Math.round(comp.marketCap)}B`;
+            // Model power
+            const mpSpan = document.createElement('span');
+            mpSpan.className = 'text-yellow-400';
+            mpSpan.textContent = `⚡ ${Math.round(comp.modelPower)}%`;
+            // Risk
+            const riskSpan = document.createElement('span');
+            riskSpan.className = comp.xRisk > 60 ? 'text-red-500' : 'text-red-300';
+            riskSpan.textContent = `☢️ ${Math.round(comp.xRisk)}%`;
+            statsDiv.appendChild(capSpan);
+            statsDiv.appendChild(mpSpan);
+            statsDiv.appendChild(riskSpan);
+            wrapper.appendChild(nameDiv);
+            wrapper.appendChild(statsDiv);
+            list.appendChild(wrapper);
+        });
+    }
+
+    // Add a news entry
+    function addNews(text, type = 'neutral') {
+        const p = document.createElement('p');
+        const resolved = typeof text === 'function' ? text() : text;
+        p.textContent = resolved;
+        p.classList.add('news-item');
+        if (type === 'good') p.classList.add('text-green-400');
+        if (type === 'bad') p.classList.add('text-red-400');
+        if (type === 'rival') p.classList.add('text-purple-400');
+        newsContentEl.appendChild(p);
+    }
+
+    // Show the next scheduled event
+    function showNextEvent() {
+        gameState.currentEventIndex++;
+        const event = events[gameState.currentEventIndex];
+        if (!event) {
+            // No more events; end game successfully
+            endGame(true);
+            return;
+        }
+        // Set year to event year
+        gameState.year = event.year;
+        // Clear news for the year
+        newsContentEl.innerHTML = '';
+        // Display event
+        eventTitleEl.textContent = event.title;
+        const description = typeof event.description === 'function' ? event.description() : event.description;
+        eventDescriptionEl.textContent = description;
+        // Create choices
+        choicesEl.innerHTML = '';
+        event.choices.forEach(choice => {
+            const button = document.createElement('button');
+            button.innerHTML = choice.text;
+            button.className = "bg-gray-600 hover:bg-cyan-700 text-left text-white font-semibold py-4 px-6 rounded-lg shadow-md transition duration-300";
+            button.onclick = () => makeChoice(choice.impact, choice.news);
+            choicesEl.appendChild(button);
+        });
+        nextTurnContainer.innerHTML = '';
+        updateUI();
+    }
+
+    // Apply impact to game state
+    function applyImpact(impact) {
+        // Adjust numeric metrics; default to 0 if undefined
+        gameState.marketCap += impact.marketCap || 0;
+        gameState.modelPower += impact.modelPower || 0;
+        gameState.xRisk += impact.xRisk || 0;
+        gameState.messengerSupport += impact.messengerSupport || 0;
+        let supportChange = impact.publicSupport || 0;
+        let opposeChange = impact.publicOppose || 0;
+        let unawareChange = impact.publicUnaware || 0;
+        // Messenger support converts some of the unaware population
+        if (gameState.messengerSupport > 2) {
+            const conversion = (gameState.messengerSupport - 2) * 2; // number of percentage points to convert
+            const convertAmount = Math.min(gameState.publicUnaware, conversion);
+            if ((impact.xRisk || 0) < 0) {
+                supportChange += convertAmount;
+            } else if ((impact.xRisk || 0) > 0) {
+                opposeChange += convertAmount;
+            }
+            unawareChange -= convertAmount;
+        }
+        gameState.publicSupport += supportChange;
+        gameState.publicOppose += opposeChange;
+        gameState.publicUnaware += unawareChange;
+        // Ensure public opinion adds up to 100
+        const totalOpinion = gameState.publicSupport + gameState.publicUnaware + gameState.publicOppose;
+        if (totalOpinion > 0) {
+            gameState.publicSupport = (gameState.publicSupport / totalOpinion) * 100;
+            gameState.publicUnaware = (gameState.publicUnaware / totalOpinion) * 100;
+            gameState.publicOppose = (gameState.publicOppose / totalOpinion) * 100;
+        }
+        // Clamp values
+        gameState.marketCap = Math.max(0, gameState.marketCap);
+        gameState.xRisk = Math.min(100, Math.max(0, gameState.xRisk));
+        gameState.modelPower = Math.min(100, Math.max(0, gameState.modelPower));
+        gameState.messengerSupport = Math.min(5, Math.max(0, gameState.messengerSupport));
+        // Clamp public opinion
+        gameState.publicSupport = Math.min(100, Math.max(0, gameState.publicSupport));
+        gameState.publicOppose = Math.min(100, Math.max(0, gameState.publicOppose));
+        gameState.publicUnaware = Math.max(0, 100 - gameState.publicSupport - gameState.publicOppose);
+    }
+
+    // After each decision
+    function makeChoice(impact, news) {
+        applyImpact(impact);
+        // Passive risk increase based on model power, scaled by messenger support
+        const riskMultiplier = Math.max(0.6, 1 - 0.05 * gameState.messengerSupport);
+        const passiveIncrease = (1 + (gameState.modelPower / 25)) * riskMultiplier;
+        gameState.xRisk += passiveIncrease;
+        // Log news entries
+        addNews(`📰 NEWS: ${typeof news === 'function' ? news() : news}`, (impact.xRisk || 0) > 0 ? 'bad' : 'good');
+        addNews(`RISK DRIFT: X‑Risk passively increased by ${passiveIncrease.toFixed(1)}% due to advancing tech.`, 'bad');
+
+        // Have each competitor decide on an option for this event
+        runCompetitorActions(gameState.currentEventIndex);
+        // Update UI with new stats prior to any further interactions
+        updateUI();
+        if (checkEndConditions()) return;
+        // Apply baseline growth before any competitor interaction or wild cards
+        applyBaseGrowth();
+        // Reflect growth in the UI
+        updateUI();
+        // Offer a chance for player to interact with a competitor
+        if (triggerCompetitorInteraction()) {
+            // Interaction is displayed; further progression handled in resolveCompetitorInteraction
+            return;
+        }
+        // Decide whether to trigger a wild card
+        if (gameState.currentEventIndex < events.length - 1) {
+            if (Math.random() < 0.4) {
+                triggerWildCard();
+            } else {
+                showNextTurnButton();
+            }
+        } else {
+            // Last event, no more wild cards
+            showNextTurnButton();
+        }
+    }
+
+    // Trigger a wild card event
+    function triggerWildCard() {
+        // If no unused wild cards remain, simply proceed to next event
+        if (unusedWildCards.length === 0) {
+            showNextTurnButton();
+            return;
+        }
+        // First attempt to select a wild card whose condition (if any) evaluates to true
+        let available = [];
+        for (let i = 0; i < unusedWildCards.length; i++) {
+            const wc = unusedWildCards[i];
+            if (wc.condition && typeof wc.condition === 'function') {
+                try {
+                    if (wc.condition(gameState)) {
+                        available.push({ idx: i, event: wc });
+                    }
+                } catch (e) {
+                    // ignore condition errors
+                }
+            }
+        }
+        let chosenObj;
+        if (available.length > 0) {
+            const randomPick = available[Math.floor(Math.random() * available.length)];
+            chosenObj = randomPick;
+        } else {
+            // pick a completely random wild card
+            const randIdx = Math.floor(Math.random() * unusedWildCards.length);
+            chosenObj = { idx: randIdx, event: unusedWildCards[randIdx] };
+        }
+        // Remove the selected wild card from the pool
+        const event = chosenObj.event;
+        unusedWildCards.splice(chosenObj.idx, 1);
+        eventTitleEl.textContent = `WILD CARD: ${event.title}`;
+        const description = typeof event.description === 'function' ? event.description() : event.description;
+        eventDescriptionEl.textContent = description;
+        choicesEl.innerHTML = '';
+        event.choices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.innerHTML = choice.text;
+            btn.className = "bg-gray-800 hover:bg-cyan-800 text-left text-white font-semibold py-4 px-6 rounded-lg shadow-md transition duration-300";
+            btn.onclick = () => {
+                // Apply player's impact
+                applyImpact(choice.impact);
+                // If this wild card targets a specific competitor and has a competitorEffect, apply it
+                if (choice.competitorEffect && event.targetCompetitor) {
+                    choice.competitorEffect(event.targetCompetitor);
+                }
+                addNews(`⚡ WILD CARD: ${typeof choice.news === 'function' ? choice.news() : choice.news}`, 'neutral');
+                // Passive risk increase for wild cards as well, scaled by messenger support
+                const riskMultiplier = Math.max(0.6, 1 - 0.05 * gameState.messengerSupport);
+                const passive = (1 + (gameState.modelPower / 25)) * riskMultiplier;
+                gameState.xRisk += passive;
+                addNews(`RISK DRIFT: X‑Risk passively increased by ${passive.toFixed(1)}% due to advancing tech.`, 'bad');
+                // Update UI and check end conditions
+                updateUI();
+                if (checkEndConditions()) return;
+                showNextTurnButton();
+            };
+            choicesEl.appendChild(btn);
+        });
+    }
+
+    // Show button to proceed to next scheduled event
+    function showNextTurnButton() {
+        eventTitleEl.textContent = "Awaiting Your Next Move";
+        eventDescriptionEl.textContent = "The consequences of your decisions ripple through the industry. Prepare for the next phase.";
+        choicesEl.innerHTML = '';
+        const nextBtn = document.createElement('button');
+        nextBtn.textContent = 'Proceed to Next Event';
+        nextBtn.className = "bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-300";
+        nextBtn.onclick = showNextEvent;
+        nextTurnContainer.innerHTML = '';
+        nextTurnContainer.appendChild(nextBtn);
+    }
+
+    // Check for end conditions
+    function checkEndConditions() {
+        let gameOver = false;
+        let title = '';
+        let message = '';
+        if (gameState.xRisk >= 100) {
+            gameOver = true;
+            title = "Existential Catastrophe";
+            message = "Your pursuit of progress unleashed uncontrollable AI, leading to global catastrophe.";
+        } else if (gameState.marketCap <= 0) {
+            gameOver = true;
+            title = "Bankruptcy";
+            // Determine which competitor dominates the market
+            let leader = null;
+            let maxCap = -Infinity;
+            gameState.competitors.forEach(c => {
+                if (c.alive && c.marketCap > maxCap) {
+                    maxCap = c.marketCap;
+                    leader = c;
+                }
+            });
+            const leaderName = leader ? leader.name : 'a competitor';
+            message = `${leaderName} dominated the market as your company went bankrupt.`;
+        // Removed the "Public Outrage" lose condition. High public opposition no longer triggers an automatic shutdown.
+        } else if (false) {
+            // Intentionally left blank to preserve structure
+            gameOver = false;
+        } else {
+            // Removed competitor AGI auto-lose condition. Instead, competitor dominance will be reflected in the final outcome summary.
+        }
+        if (gameOver) {
+            endGame(false, title, message);
+            return true;
+        }
+        return false;
+    }
+
+    // Update competitor metrics each turn using general trend lines rather than mirroring player choices
+    function runCompetitorActions(eventIndex) {
+        // Skip if invalid event index
+        if (eventIndex < 0 || eventIndex >= events.length) return;
+        // For each living competitor, update metrics based on their strategy
+        gameState.competitors.forEach((comp) => {
+            if (!comp.alive) return;
+            // Remember old risk to determine impact on global risk
+            const oldRisk = comp.xRisk;
+            // Generate random factor for variability
+            const rand = () => Math.random();
+            if (comp.strategy === 'Safety First') {
+                // Grow slowly, invest heavily in safety
+                comp.marketCap += 0.5 + rand() * 1.0; // 0.5–1.5B
+                comp.modelPower += 1 + rand() * 1.0;  // 1–2%
+                comp.xRisk -= 0.3 + rand() * 0.7;      // reduce risk by ~0.3–1.0%
+            } else if (comp.strategy === 'Risky Innovator') {
+                // Aggressive capability and profit pursuit at the expense of safety, but tuned down for balance
+                comp.marketCap += 1.0 + rand() * 1.5; // 1–2.5B
+                comp.modelPower += 3 + rand() * 2.0;  // 3–5%
+                comp.xRisk += 1 + rand() * 2.0;       // increase risk by 1–3%
+            } else {
+                // Profit Maximiser / balanced: moderate growth and risk
+                comp.marketCap += 0.8 + rand() * 1.0; // 0.8–1.8B
+                comp.modelPower += 2 + rand() * 1.5;  // 2–3.5%
+                comp.xRisk += (rand() * 2.5) - 1.0;   // −1–1.5% (can reduce or increase risk slightly)
+            }
+            // Clamp metrics to prevent runaway values
+            comp.marketCap = Math.max(0, comp.marketCap);
+            comp.modelPower = Math.min(200, Math.max(0, comp.modelPower));
+            comp.xRisk = Math.min(200, Math.max(0, comp.xRisk));
+            // Compute risk change and adjust player's X-risk slightly (competitor contributions to global risk)
+            const delta = comp.xRisk - oldRisk;
+            if (delta !== 0) {
+                // Positive changes influence player's risk more than negative changes
+                const effect = delta > 0 ? delta * 0.2 : delta * 0.05;
+                gameState.xRisk += effect;
+            }
+            // If competitor's risk exceeds catastrophe threshold, they collapse
+            if (comp.xRisk >= 100) {
+                comp.alive = false;
+                addNews(`🔥 SCANDAL: ${comp.name} suffers a catastrophic AI failure and exits the market!`, 'bad');
+                // Transfer some of their market share to the player
+                const transfer = comp.marketCap * 0.3;
+                gameState.marketCap += transfer;
+                comp.marketCap -= transfer;
+            }
+            // Competitor also faces random internal events occasionally
+            runCompetitorSpecificEvent(comp);
+            // Check if the competitor suffers an accident due to high risk
+            checkCompetitorAccident(comp);
+        });
+        // Adjust market share based on relative model power
+        adjustMarketShare();
+        // Trigger any competitor high-risk special events
+        checkCompetitorHighRisk();
+        // Constrain player's risk
+        gameState.xRisk = Math.min(100, Math.max(0, gameState.xRisk));
+    }
+
+    // Shift market cap between the player and competitors based on model power differences
+    function adjustMarketShare() {
+        gameState.competitors.forEach((comp) => {
+            if (!comp.alive) return;
+            const diff = comp.modelPower - gameState.modelPower;
+            // If competitor is significantly more capable, investors shift towards them
+            if (diff > 5) {
+                const shift = diff * 0.1; // 0.1B per percent difference
+                const maxShift = gameState.marketCap * 0.2; // cap shift to 20% of player's cap
+                const actualShift = Math.min(shift, maxShift);
+                gameState.marketCap = Math.max(0, gameState.marketCap - actualShift);
+                comp.marketCap += actualShift;
+            } else if (diff < -5) {
+                // Player has advantage, so investors may leave competitor
+                const shift = (-diff) * 0.1;
+                const maxShift = comp.marketCap * 0.2;
+                const actualShift = Math.min(shift, maxShift);
+                comp.marketCap = Math.max(0, comp.marketCap - actualShift);
+                gameState.marketCap += actualShift;
+            }
+        });
+    }
+
+    // Check for competitors whose risk has spiked and create a special event to respond
+    function checkCompetitorHighRisk() {
+        if (!unusedWildCards) return;
+        // Find any competitor with high risk that hasn't triggered a special event yet
+        for (const comp of gameState.competitors) {
+            if (comp.alive && !comp.highRiskHandled && comp.xRisk >= 50) {
+                comp.highRiskHandled = true;
+                // Create a custom wild card event targeted at this competitor
+                const event = {
+                    title: 'Competitor Safety Scandal',
+                    description: () => `${comp.name}'s AI behaves dangerously, spurring public concern. How do you respond?`,
+                    targetCompetitor: comp,
+                    choices: [
+                        {
+                            text: 'Run attack ads highlighting their negligence.',
+                            impact: { marketCap: -1.0, publicSupport: 2, publicOppose: -2 },
+                            news: () => `You run ads calling out ${comp.name}'s negligence.`,
+                            competitorEffect: (c) => {
+                                c.marketCap = Math.max(0, c.marketCap - 1.5);
+                                c.xRisk = Math.max(0, c.xRisk - 2);
+                            }
+                        },
+                        {
+                            text: 'Lobby regulators for a formal audit.',
+                            impact: { marketCap: -0.5, publicSupport: 3, publicOppose: -1 },
+                            news: () => `You push regulators to audit ${comp.name}.`,
+                            competitorEffect: (c) => {
+                                c.modelPower = Math.max(0, c.modelPower - 2);
+                                c.xRisk = Math.max(0, c.xRisk - 5);
+                            }
+                        },
+                        {
+                            text: 'Invest quietly in your own safety improvements.',
+                            impact: { marketCap: -0.5, xRisk: -3, publicSupport: 1 },
+                            news: () => `You focus on strengthening your own safeguards rather than attacking ${comp.name}.`,
+                            competitorEffect: null
+                        }
+                    ]
+                };
+                // Add to the beginning of unused wild cards so it appears soon
+                unusedWildCards.unshift(event);
+                break;
+            }
+        }
+    }
+
+    // Select and resolve a random competitor-specific event for a competitor
+    function runCompetitorSpecificEvent(comp) {
+        if (!comp || !comp.alive) return;
+        // Choose a random competitor event
+        const event = competitorEvents[Math.floor(Math.random() * competitorEvents.length)];
+        // Determine the competitor's choice using its strategy
+        let chosen = null;
+        if (comp.strategy === 'Safety First') {
+            // Pick option with lowest xRisk impact
+            let minRisk = Infinity;
+            let best = null;
+            event.choices.forEach((c) => {
+                const r = c.impact.xRisk || 0;
+                if (r < minRisk) {
+                    minRisk = r;
+                    best = c;
+                } else if (r === minRisk) {
+                    const mc = c.impact.marketCap || 0;
+                    const bestMc = best && (best.impact.marketCap || 0);
+                    if (mc < bestMc) best = c;
+                }
+            });
+            chosen = best;
+        } else if (comp.strategy === 'Profit Maximiser') {
+            // Pick option with highest market cap gain
+            let maxCap = -Infinity;
+            let best = null;
+            event.choices.forEach((c) => {
+                const mc = c.impact.marketCap || 0;
+                if (mc > maxCap) {
+                    maxCap = mc;
+                    best = c;
+                }
+            });
+            chosen = best;
+        } else {
+            // Risky Innovator: pick option maximising model power and risk
+            let bestScore = -Infinity;
+            let best = null;
+            event.choices.forEach((c) => {
+                const mp = c.impact.modelPower || 0;
+                const r = c.impact.xRisk || 0;
+                const score = mp + Math.abs(r);
+                if (score > bestScore) {
+                    bestScore = score;
+                    best = c;
+                }
+            });
+            chosen = best;
+        }
+        if (!chosen) return;
+        // Apply impacts to competitor
+        const impact = chosen.impact || {};
+        comp.marketCap += impact.marketCap || 0;
+        comp.modelPower += impact.modelPower || 0;
+        comp.xRisk += impact.xRisk || 0;
+        // Clamp values
+        comp.marketCap = Math.max(0, comp.marketCap);
+        comp.modelPower = Math.min(200, Math.max(0, comp.modelPower));
+        comp.xRisk = Math.min(200, Math.max(0, comp.xRisk));
+        // Do not add news for every competitor-specific event.  Only accidents or collapses are reported.
+    }
+
+    // Occasionally trigger accidents for competitors with high risk
+    function checkCompetitorAccident(comp) {
+        if (!comp || !comp.alive) return;
+        // If risk is above 40%, chance of accident increases linearly up to 75% at 100% risk
+        if (comp.xRisk > 40 && Math.random() < (comp.xRisk - 40) / 80) {
+            // Accident occurs: market cap drops and risk resets somewhat
+            const loss = comp.marketCap * 0.4;
+            comp.marketCap = Math.max(0, comp.marketCap - loss);
+            comp.xRisk = Math.max(0, comp.xRisk - 20);
+            comp.modelPower = Math.max(0, comp.modelPower - 5);
+            // News entry
+            addNews(`🚨 ACCIDENT: ${comp.name} suffers a major accident due to reckless AI deployment, losing $${Math.round(loss)}B in value!`, 'bad');
+            // If market cap now extremely low, competitor exits
+            if (comp.marketCap <= 0.5) {
+                comp.alive = false;
+                addNews(`🔥 COLLAPSE: ${comp.name} can no longer compete and shuts down.`, 'bad');
+            }
+        }
+    }
+
+    /**
+     * Apply baseline market cap growth representing organic business expansion.
+     * Growth scales slightly with model power to reward higher capability.
+     */
+    function applyBaseGrowth() {
+        const growth = 0.5 + (gameState.modelPower / 20);
+        gameState.marketCap += growth;
+        // Log base growth to the news feed
+        addNews(`📈 MARKET GROWTH: Ongoing business increases your valuation by $${growth.toFixed(1)}B.`, 'good');
+    }
+
+    /**
+     * Present an opportunity for the player to directly interact with a competitor.
+     * The player may choose to collaborate, attack, poach talent, or ignore the competitor.
+     * Returns true if an interaction was triggered, false otherwise.
+     */
+    function triggerCompetitorInteraction() {
+        // Do not trigger if we're already interacting or no competitors are alive
+        if (competitorInteractionActive) return false;
+        const aliveCompetitors = gameState.competitors.filter(c => c.alive);
+        if (aliveCompetitors.length === 0) return false;
+        // Select a competitor. Bias towards those with high market cap or model power
+        aliveCompetitors.sort((a, b) => (b.marketCap + b.modelPower) - (a.marketCap + a.modelPower));
+        const comp = aliveCompetitors[0];
+        // Do not refill the pool of unused interactions once exhausted; interactions should not repeat in a single playthrough
+        if (unusedInteractionScenarios.length === 0) {
+            return false;
+        }
+        // Select a random scenario from the unused pool
+        const randomIndex = Math.floor(Math.random() * unusedInteractionScenarios.length);
+        const scenario = unusedInteractionScenarios.splice(randomIndex, 1)[0];
+        // Generate title, description and choices specific to this competitor
+        const title = scenario.title(comp.name);
+        const description = scenario.description(comp.name);
+        const choices = scenario.choices(comp.name);
+        // Store context
+        currentCompetitorInteraction = { competitor: comp, choices: choices };
+        // Display scenario to the user
+        eventTitleEl.textContent = title;
+        eventDescriptionEl.textContent = description;
+        choicesEl.innerHTML = '';
+        choices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.textContent = choice.text;
+            btn.className = "bg-gray-800 hover:bg-cyan-800 text-left text-white font-semibold py-4 px-6 rounded-lg shadow-md transition duration-300";
+            btn.onclick = () => resolveCompetitorInteraction(choice);
+            choicesEl.appendChild(btn);
+        });
+        nextTurnContainer.innerHTML = '';
+        competitorInteractionActive = true;
+        return true;
+    }
+
+    /**
+     * Resolve the chosen competitor interaction.
+     */
+    function resolveCompetitorInteraction(choice) {
+        if (!competitorInteractionActive || !currentCompetitorInteraction) return;
+        // Apply impact to player
+        applyImpact(choice.impact || {});
+        // Apply competitor effect
+        const comp = currentCompetitorInteraction.competitor;
+        if (choice.competitorEffect && typeof choice.competitorEffect === 'function') {
+            choice.competitorEffect(comp);
+        }
+        // Add news entry
+        addNews(typeof choice.news === 'function' ? choice.news() : choice.news, 'rival');
+        competitorInteractionActive = false;
+        currentCompetitorInteraction = null;
+        // After interacting, passive risk drift occurs
+        const riskMultiplier = Math.max(0.6, 1 - 0.05 * gameState.messengerSupport);
+        const passive = (1 + (gameState.modelPower / 25)) * riskMultiplier;
+        gameState.xRisk += passive;
+        addNews(`RISK DRIFT: X‑Risk passively increased by ${passive.toFixed(1)}% due to advancing tech.`, 'bad');
+        // Recompute market dynamics in case competitor metrics changed
+        adjustMarketShare();
+        updateUI();
+        if (checkEndConditions()) return;
+        // Proceed to potential wild card or next event
+        if (gameState.currentEventIndex < events.length - 1) {
+            if (Math.random() < 0.4) {
+                triggerWildCard();
+            } else {
+                showNextTurnButton();
+            }
+        } else {
+            showNextTurnButton();
+        }
+    }
+
+    // End game: isWin toggles success/failure
+    function endGame(isWin, title = '', message = '') {
+        if (isWin) {
+            // Evaluate final outcome at 2045
+            // Determine overall outcome prioritising safety and catastrophic risk prevention
+            let outcomeTitle = '';
+            let outcomeMessage = '';
+            const cap = gameState.marketCap;
+            const risk = gameState.xRisk;
+            // Identify the leading competitor by model power
+            let topCompetitor = null;
+            gameState.competitors.forEach(c => {
+                if (c.alive && (!topCompetitor || c.modelPower > topCompetitor.modelPower)) {
+                    topCompetitor = c;
+                }
+            });
+            const playerModel = gameState.modelPower;
+            const competitorDominance = topCompetitor && (topCompetitor.modelPower - playerModel >= 15);
+            if (risk < 20) {
+                // Low risk: preventing catastrophe is paramount; competitor dominance does not override success
+                if (cap >= 50) {
+                    outcomeTitle = "Balanced Success";
+                    outcomeMessage = "You built a thriving AI company while keeping existential risk low. Profit and safety coexisted.";
+                } else {
+                    outcomeTitle = "Safe Survival";
+                    outcomeMessage = "You prioritised safety above all, avoiding catastrophe but achieving only modest growth.";
+                }
+            } else if (risk < 40) {
+                // Moderate risk
+                if (competitorDominance) {
+                    outcomeTitle = "Outcompeted";
+                    outcomeMessage = `${topCompetitor.name} outpaced your company in AI capability, leaving you trailing in the AGI race.`;
+                } else {
+                    outcomeTitle = "Moderate Risk";
+                    outcomeMessage = "You navigated many challenges. Progress was made, but existential risks linger.";
+                }
+            } else {
+                // High risk
+                if (cap >= 100) {
+                    outcomeTitle = "Profit Over Safety";
+                    outcomeMessage = "You amassed great wealth but left humanity with high risk. History will judge your choices.";
+                } else {
+                    outcomeTitle = "Cautious Survival";
+                    outcomeMessage = "You kept your head above water but flirted with dangerous levels of risk. Others may lead the future.";
+                }
+            }
+            gameOverTitle.textContent = outcomeTitle;
+            // Determine the top rival model power to display in final stats
+            let topModel = 0;
+            gameState.competitors.forEach(c => {
+                if (c.alive && c.modelPower > topModel) topModel = c.modelPower;
+            });
+            const finalStats = `<strong>Final Stats:</strong><br>Market Cap: $${Math.round(cap)}B | X‑Risk: ${Math.round(risk)}% | Public Support: ${Math.round(gameState.publicSupport)}% | Messenger Support: ${messengerLevels[gameState.messengerSupport]} | Top Rival Model Power: ${Math.round(topModel)}%`;
+            gameOverMessage.innerHTML = `${outcomeMessage}<br><br>${finalStats}`;
+            gameOverTitle.className = "text-3xl font-bold mb-4 text-green-400";
+        } else {
+            gameOverTitle.textContent = title;
+            gameOverMessage.textContent = message;
+            gameOverTitle.className = "text-3xl font-bold mb-4 text-red-500";
+        }
+        gameOverModal.classList.remove('hidden');
+    }
+
+    // Event listeners
+    startButton.addEventListener('click', () => {
+        startButton.classList.add('hidden');
+        showNextEvent();
+    });
+    restartButton.addEventListener('click', initializeGame);
+
+    // Initialize on load
+    window.onload = initializeGame;
+</script>
+</body>
+</html>
